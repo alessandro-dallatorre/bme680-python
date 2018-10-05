@@ -77,7 +77,7 @@ def setTempHumLevel(idx, tempLevel, humLevel):
 def setAirQuality(idx, airPercentage):
     # url of the REST API, player command passed via function
     
-    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" str(airPercentage)
+    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" + str(airPercentage)
     try:
         # make the request and get the response
         response = requests.get(url)
