@@ -48,9 +48,9 @@ burn_in_time = 10
 burn_in_data = []
 
 # Domoticz REST API
-def setTempLevel(idx, level):
+def setTempHumLevel(idx, tempLevel, humLevel):
     # url of the REST API, player command passed via function
-    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=" + str(level) + "&svalue=TEMP"
+    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" + str(tempLevel) + ";" + str(humLevel) + ";1"
     try:
         # make the request and get the response
         response = requests.get(url)
@@ -129,7 +129,7 @@ try:
                 gas,
                 hum,
                 air_quality_score))
-            setTempLevel(idxTempHum,temp)
+            setTempHumLevel(idxTempHum,temp, hum)
             time.sleep(samplingInterval)
 
 except KeyboardInterrupt:
