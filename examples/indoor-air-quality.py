@@ -7,7 +7,7 @@ import requests
 domoticzUrl = "192.168.178.20:8080"
 idxTempHum = 62
 idxAirQuality = 63
-samplingInterval = 60
+samplingInterval = 1
 
 print("""Estimate indoor air quality
 
@@ -119,6 +119,7 @@ try:
         hum_baseline))
 
     while True:
+        counter = 0
         if sensor.get_sensor_data() and sensor.data.heat_stable:
             gas = sensor.data.gas_resistance
             gas_offset = gas_baseline - gas
@@ -155,8 +156,13 @@ try:
                 gas,
                 hum,
                 air_quality_score))
-            setTempHumLevel(idxTempHum,temp, hum)
-            setAirQuality(idxAirQuality, air_quality_score)
+            
+            counter += 1
+            if counter % 60 == 0:
+                counter = 0
+                setTempHumLevel(idxTempHum,temp, hum)
+                setAirQuality(idxAirQuality, air_quality_score)
+                
             time.sleep(samplingInterval)
 
 except KeyboardInterrupt:
