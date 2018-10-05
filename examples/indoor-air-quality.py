@@ -6,6 +6,7 @@ import requests
 
 domoticzUrl = "192.168.178.20:8080"
 idxTempHum = 62
+idxAirQuality = 63
 samplingInterval = 60
 
 print("""Estimate indoor air quality
@@ -50,7 +51,33 @@ burn_in_data = []
 # Domoticz REST API
 def setTempHumLevel(idx, tempLevel, humLevel):
     # url of the REST API, player command passed via function
-    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" + str(tempLevel) + ";" + str(humLevel) + ";1"
+    humStat = 0 #normal
+    if humLevel < 40:
+        humStat = 2 #dry
+    elif humLevel > 60:
+        humStat = 3 #wet
+    if humStat == 0 and tempLevel > 20:
+        humStat = 1 #confortable
+    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" + str(tempLevel) + ";" + str(humLevel) + ";" + str(humStat)
+    try:
+        # make the request and get the response
+        response = requests.get(url)
+
+        if (response.ok):
+            # do something if the response is ok
+            print("response ok") #+ response.text)
+        else:
+            # do something if the response is not ok
+            print("response not ok")
+
+    # do something if a connection error occurs
+    except requests.ConnectionError:
+        print("connection error")
+
+def setAirQuality(idx, airPercentage):
+    # url of the REST API, player command passed via function
+    
+    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=0&svalue=" str(airPercentage)
     try:
         # make the request and get the response
         response = requests.get(url)
@@ -130,6 +157,7 @@ try:
                 hum,
                 air_quality_score))
             setTempHumLevel(idxTempHum,temp, hum)
+            setAirQuality(idxAirQuality, air_quality_score)
             time.sleep(samplingInterval)
 
 except KeyboardInterrupt:
