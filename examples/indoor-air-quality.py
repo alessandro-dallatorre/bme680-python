@@ -118,8 +118,8 @@ try:
         gas_baseline,
         hum_baseline))
 
+    counter = 0
     while True:
-        counter = 0
         if sensor.get_sensor_data() and sensor.data.heat_stable:
             gas = sensor.data.gas_resistance
             gas_offset = gas_baseline - gas
@@ -162,7 +162,7 @@ try:
                 counter = 0
                 setTempHumLevel(idxTempHum,temp, hum)
                 setAirQuality(idxAirQuality, air_quality_score)
-                
+
             time.sleep(samplingInterval)
 
 except KeyboardInterrupt:
