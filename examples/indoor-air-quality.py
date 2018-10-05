@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 import bme680
 import time
+import json
+import requests
+
+domoticzUrl = "192.168.178.20:8080"
+idxTempHum = 62
+samplingInterval = 60
 
 print("""Estimate indoor air quality
 
@@ -36,9 +42,29 @@ sensor.select_gas_heater_profile(0)
 
 start_time = time.time()
 curr_time = time.time()
-burn_in_time = 300
+burn_in_time = 10 
+#300
 
 burn_in_data = []
+
+# Domoticz REST API
+def setTempLevel(idx, level):
+    # url of the REST API, player command passed via function
+    url = "http://"+domoticzUrl+"/json.htm?type=command&param=udevice&idx="+str(idx)+"&nvalue=" + str(level) + "&svalue=TEMP"
+    try:
+        # make the request and get the response
+        response = requests.get(url)
+
+        if (response.ok):
+            # do something if the response is ok
+            print("response ok") #+ response.text)
+        else:
+            # do something if the response is not ok
+            print("response not ok")
+
+    # do something if a connection error occurs
+    except requests.ConnectionError:
+        print("connection error")
 
 try:
     # Collect gas resistance burn-in values, then use the average
@@ -71,6 +97,8 @@ try:
             gas = sensor.data.gas_resistance
             gas_offset = gas_baseline - gas
 
+            temp = sensor.data.temperature
+
             hum = sensor.data.humidity
             hum_offset = hum - hum_baseline
 
@@ -95,13 +123,14 @@ try:
 
             # Calculate air_quality_score.
             air_quality_score = hum_score + gas_score
-
+            print ('Temperature: {0:.2f}'.format(
+                temp))
             print('Gas: {0:.2f} Ohms,humidity: {1:.2f} %RH,air quality: {2:.2f}'.format(
                 gas,
                 hum,
                 air_quality_score))
-
-            time.sleep(1)
+            setTempLevel(idxTempHum,temp)
+            time.sleep(samplingInterval)
 
 except KeyboardInterrupt:
     pass
